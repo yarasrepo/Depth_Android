@@ -125,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
 //                    } else {
 //                        Log.e(TAG, "Failed to save image");
 //                    }
-//                    sendToApi(bitmap);
-                    apiTest();
+                    sendToApi(bitmap);
+//                    apiTest();
                 } else {
                     Log.e(TAG, "Bitmap conversion failed");
                 }
