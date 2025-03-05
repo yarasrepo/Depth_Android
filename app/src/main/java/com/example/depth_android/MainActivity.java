@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
 //                        Log.e(TAG, "Failed to save image");
 //                    }
                     sendToApi(bitmap);
-//                    apiTest();
                 } else {
                     Log.e(TAG, "Bitmap conversion failed");
                 }
@@ -178,35 +177,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("API Error", "Request failed", t);
             }
         });
-    }
-
-    private void apiTest(){
-        ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
-
-// Call the hello() method
-        Call<ResponseBody> call = apiService.hello();
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    // Handle the success response
-                    try {
-                        Log.d("API", "Response: " + response.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Log.e("API", "Request failed");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("API", "Error: " + t.getMessage());
-            }
-        });
-
     }
 
 
