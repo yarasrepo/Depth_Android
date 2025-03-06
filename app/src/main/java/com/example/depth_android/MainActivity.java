@@ -12,7 +12,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable captureRunnable;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    private ToggleButton previewToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +57,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         previewView = findViewById(R.id.previewView);
+        previewToggle = findViewById(R.id.previewToggle);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
         } else {
             initializeCamera();
         }
+
+        previewToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // Show the camera preview
+                previewView.setVisibility(View.VISIBLE);
+                findViewById(R.id.blackScreenView).setVisibility(View.GONE);
+            } else {
+                // Hide the camera preview, but keep capturing images
+                previewView.setVisibility(View.GONE);
+                findViewById(R.id.blackScreenView).setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -90,13 +106,18 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         Preview preview = new Preview.Builder().build();
-        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+        if (previewView.getVisibility() == View.VISIBLE) {
+            preview.setSurfaceProvider(previewView.getSurfaceProvider()); // Attach the preview to the surface if visible
+        }
 
         imageCapture = new ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build();
 
+
         cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
+
 
         captureRunnable = new Runnable() {
             @Override
@@ -108,6 +129,10 @@ public class MainActivity extends AppCompatActivity {
         handler.post(captureRunnable);
     }
 
+    private void unbindCameraUseCases(ProcessCameraProvider cameraProvider) {
+        cameraProvider.unbindAll(); // Unbind all use cases
+    }
+
     private void captureImage() {
         if (imageCapture == null) return;
 
@@ -116,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
             public void onCaptureSuccess(@NonNull ImageProxy image) {
                 Log.d(TAG, "Image captured successfully");
                 Bitmap bitmap = imageToBitmap(image);
-                image.close();
 
                 if (bitmap != null) {
 //                    File savedFile = saveImageToInternalStorage(bitmap);
