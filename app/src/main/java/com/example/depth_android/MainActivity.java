@@ -1,6 +1,7 @@
 package com.example.depth_android;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -40,6 +41,12 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "API_LOG";
@@ -187,8 +194,17 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         String responseBody = response.body().string();
                         Log.d("API Response", "Received: " + responseBody);
+                        //long depth = Long.parseLong(responseBody);
                         Toast.makeText(MainActivity.this, "Depth received: " + responseBody, Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
+                        JSONObject jsonResponse = new JSONObject(responseBody);
+
+                        // Extract the depth value (estimated_distance_meters)
+                        float depth = (float) jsonResponse.getDouble("estimated_distance_meters");
+                        if(depth<=0.05){
+                            triggerVibration();
+                        }
+
+                    } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
                 } else {
@@ -277,7 +293,17 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+//vibrations function
+    private void triggerVibration() {
 
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        if (vibrator != null && vibrator.hasVibrator()) {
+
+            long[] pattern = {0, 500, 1000}; // Vibrate for 500ms, then wait for 1000ms
+            vibrator.vibrate(pattern, -1); // Pass -1 to not repeat the pattern
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
