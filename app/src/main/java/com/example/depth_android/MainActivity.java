@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         // Speak the distance
                         String message = "Estimated distance is " + depth + " meters";
                         speak(message);  // 🔹 TTS will now read this out loud
-                         if(depth<=0.05){
+                        if(depth<=0.9){
                             triggerVibration();
                         }
 
@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             return null;
         }
     }
-//vibrations function
+    //vibrations function
     private void triggerVibration() {
 
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
