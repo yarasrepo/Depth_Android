@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import java.util.Locale;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -48,7 +50,7 @@ import android.os.Vibrator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
     private static final String TAG = "API_LOG";
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private PreviewView previewView;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ToggleButton previewToggle;
 
+    private TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         previewView = findViewById(R.id.previewView);
         previewToggle = findViewById(R.id.previewToggle);
 
+
+        // Initialize TTS
+        tts = new TextToSpeech(this, this);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
         } else {
@@ -83,6 +89,18 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.blackScreenView).setVisibility(View.VISIBLE);
             }
         });
+    }
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            tts.setLanguage(Locale.US);  // Set language
+        } else {
+            Log.e("TTS", "Initialization failed");
+        }
+    }
+    // Function to speak out the API response
+    private void speak(String text) {
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
     @Override
@@ -200,7 +218,10 @@ public class MainActivity extends AppCompatActivity {
 
                         // Extract the depth value (estimated_distance_meters)
                         float depth = (float) jsonResponse.getDouble("estimated_distance_meters");
-                        if(depth<=0.05){
+                        // Speak the distance
+                        String message = "Estimated distance is " + depth + " meters";
+                        speak(message);  // 🔹 TTS will now read this out loud
+                         if(depth<=0.05){
                             triggerVibration();
                         }
 
@@ -216,6 +237,8 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("API Error", "Request failed", t);
             }
+
+
         });
     }
 
