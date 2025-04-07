@@ -47,6 +47,7 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -209,25 +210,45 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
+//                    try {
+//                        String responseBody = response.body().string();
+//                        Log.d("API Response", "Received: " + responseBody);
+//                        //long depth = Long.parseLong(responseBody);
+//                        Toast.makeText(MainActivity.this, "Depth received: " + responseBody, Toast.LENGTH_LONG).show();
+//                        JSONObject jsonResponse = new JSONObject(responseBody);
+//
+//                        // Extract the depth value (estimated_distance_meters)
+//                        float depth = (float) jsonResponse.getDouble("estimated_distance_meters");
+//                        // Speak the distance
+//                        String message = "Estimated distance is " + depth + " meters";
+//                        speak(message);  // 🔹 TTS will now read this out loud
+//                        if(depth<=0.9){
+//                            triggerVibration();
+//                        }
+//
+//                    } catch (IOException | JSONException e) {
+//                        e.printStackTrace();
+//                    }
                     try {
                         String responseBody = response.body().string();
                         Log.d("API Response", "Received: " + responseBody);
-                        //long depth = Long.parseLong(responseBody);
-                        Toast.makeText(MainActivity.this, "Depth received: " + responseBody, Toast.LENGTH_LONG).show();
                         JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        // Extract the depth value (estimated_distance_meters)
-                        float depth = (float) jsonResponse.getDouble("estimated_distance_meters");
-                        // Speak the distance
-                        String message = "Estimated distance is " + depth + " meters";
-                        speak(message);  // 🔹 TTS will now read this out loud
-                        if(depth<=0.9){
-                            triggerVibration();
+                        // 🎯 Extract first detected label
+                        JSONArray detectedObjects = jsonResponse.getJSONArray("detected_objects");
+                        if (detectedObjects.length() > 0) {
+                            JSONObject firstObject = detectedObjects.getJSONObject(0);
+                            String label = firstObject.getString("label");
+                            String message = "Detected " + label;
+                            speak(message);
+                        } else {
+                            speak("No object detected");
                         }
 
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
+
                 } else {
                     Log.e("API Error", "Request failed: " + response.code());
                 }
