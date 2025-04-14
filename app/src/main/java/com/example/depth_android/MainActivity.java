@@ -234,13 +234,23 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                         Log.d("API Response", "Received: " + responseBody);
                         JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        // 🎯 Extract first detected label
+                        // Extract distance
+                        float distance = (float) jsonResponse.getDouble("estimated_distance_meters");
+
+                        // Extract object label
                         JSONArray detectedObjects = jsonResponse.getJSONArray("detected_objects");
                         if (detectedObjects.length() > 0) {
                             JSONObject firstObject = detectedObjects.getJSONObject(0);
                             String label = firstObject.getString("label");
+
+                            // Announce both label and distance
                             String message = "Detected " + label;
                             speak(message);
+
+                            // Vibrate if close
+                            if (distance <= 0.9f) {
+                                triggerVibration();
+                            }
                         } else {
                             speak("No object detected");
                         }
@@ -248,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
+
 
                 } else {
                     Log.e("API Error", "Request failed: " + response.code());
