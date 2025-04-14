@@ -61,31 +61,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
-fun RequestAudioPermission() {
-    val context = LocalContext.current
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (!isGranted) {
-                Toast.makeText(context, "Microphone permission is required!", Toast.LENGTH_SHORT).show()
-            }
-        }
-    )
-
-    LaunchedEffect(Unit) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
-}
-
-@Composable
 fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
     val ttsHelper = remember { TextToSpeechHelper(context) }
-    RequestAudioPermission()
     Surface {
         Column(modifier = Modifier.fillMaxSize()) {
             TopSection()
@@ -238,10 +216,7 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    //var isListening by remember { mutableStateOf(false) }
-    var isEmailListening by remember { mutableStateOf(false)}
-    var isUsernameListening by remember { mutableStateOf(false)}
-    var isPasswordListening by remember { mutableStateOf(false)}
+
 
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -313,24 +288,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
     }
 
 
-    val speechHelper = remember {
-        SpeechToTextHelper(context) { result ->
-            when {
-                isEmailListening -> {
-                    email = result
-                    isEmailListening = false
-                }
-                isUsernameListening -> {
-                    username = result
-                    isUsernameListening = false
-                }
-                isPasswordListening -> {
-                    password = result
-                    isPasswordListening = false
-                }
-            }
-        }
-    }
 
 
     Column {
@@ -338,7 +295,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
             LoginTextField(
                 label = "Email",
                 text = email,
-                isListening = isEmailListening,
                 isPassword = false,
                 trailing = "",
                 onTrailingClick = {},
@@ -347,25 +303,7 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
                     .clickable { ttsHelper.speak("Email field") }
             )
 
-            Spacer(modifier = Modifier.width(1.dp))
 
-            IconButton(onClick = {
-                ttsHelper.speak("Email")
-                if (isEmailListening) {
-                    speechHelper.stopListening()
-                } else {
-                    speechHelper.startListening("Email")
-                }
-                isEmailListening = !isEmailListening
-                isUsernameListening = false
-                isPasswordListening = false
-            }) {
-                Icon(
-                    painter = painterResource(id = if (isEmailListening) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-                    contentDescription = if (isEmailListening) "Stop Recording" else "Start Recording",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -374,7 +312,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
             LoginTextField(
                 label = "Username",
                 text = username,
-                isListening = isUsernameListening,
                 trailing = "",
                 isPassword = false,
                 onTrailingClick = {},
@@ -385,23 +322,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
 
             Spacer(modifier = Modifier.width(1.dp))
 
-            IconButton(onClick = {
-                ttsHelper.speak("Username")
-                if (isUsernameListening) {
-                    speechHelper.stopListening()
-                } else {
-                    speechHelper.startListening("Username")
-                }
-                isUsernameListening = !isUsernameListening
-                isPasswordListening = false
-                isEmailListening = false
-            }) {
-                Icon(
-                    painter = painterResource(id = if (isUsernameListening) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-                    contentDescription = if (isUsernameListening) "Stop Recording" else "Start Recording",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -410,7 +330,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
             LoginTextField(
                 label = "Password",
                 text = password,
-                isListening = isPasswordListening,
                 trailing = "",
                 isPassword = true,
                 onTrailingClick = {},
@@ -421,23 +340,6 @@ private fun RegisterSection(navController: NavController, ttsHelper: TextToSpeec
 
             Spacer(modifier = Modifier.width(1.dp))
 
-            IconButton(onClick = {
-                ttsHelper.speak("Password")
-                if (isPasswordListening) {
-                    speechHelper.stopListening()
-                } else {
-                    speechHelper.startListening("Password")
-                }
-                isPasswordListening = !isPasswordListening
-                isEmailListening = false
-                isUsernameListening = false
-            }) {
-                Icon(
-                    painter = painterResource(id = if (isPasswordListening) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-                    contentDescription = if (isPasswordListening) "Stop Recording" else "Start Recording",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

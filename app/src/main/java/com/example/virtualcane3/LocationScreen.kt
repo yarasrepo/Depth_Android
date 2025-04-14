@@ -86,7 +86,6 @@ import androidx.compose.ui.text.input.ImeAction
 fun LocationScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val speechToTextHelper = remember { SpeechToTextHelper(context) {} }
     val textToSpeechHelper = remember { TextToSpeechHelper(context) }
     val locationHelper = remember { LocationHelper(context) }
     val sharedWithUsers = remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
@@ -195,7 +194,6 @@ fun LocationScreen(navController: NavController) {
             ) {
                 item {
                     SearchBar(
-                        speechToTextHelper,
                         onSearchResults = { results -> searchResults.value = results }
                     )
                 }
@@ -355,7 +353,6 @@ fun LiveMapView(locationHelper: LocationHelper) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
-    speechToTextHelper: SpeechToTextHelper,
     onSearchResults: (List<Pair<String, String>>) -> Unit
 ) {
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
@@ -381,16 +378,7 @@ fun SearchBar(
                     contentDescription = "Search"
                 )
             },
-            trailingIcon = {
-                IconButton(onClick = {
-                    speechToTextHelper.startListening("Search")
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_microphone),
-                        contentDescription = "Speech to Text"
-                    )
-                }
-            },
+            trailingIcon = {},
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Search

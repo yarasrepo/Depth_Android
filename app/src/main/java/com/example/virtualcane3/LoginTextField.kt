@@ -78,7 +78,6 @@ fun LoginTextField(
     label: String,
     text: String,
     isPassword: Boolean = false,
-    isListening: Boolean,
     trailing: String,
     onTrailingClick: () -> Unit
 ) {

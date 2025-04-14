@@ -150,7 +150,7 @@ fun TextRow(label: String, value: String) {
 }
 
 @Composable
-fun InputField(value: String, label: String, onValueChange: (String) -> Unit, isRecording: MutableState<Boolean>, onMicClick: () -> Unit) {
+fun InputField(value: String, label: String, onValueChange: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,13 +164,6 @@ fun InputField(value: String, label: String, onValueChange: (String) -> Unit, is
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-        )
-        Image(
-            painter = painterResource(id = if (isRecording.value) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-            contentDescription = if (isRecording.value) "Stop Recording" else "Start Recording",
-            modifier = Modifier
-                .clickable { onMicClick() }
-                .size(24.dp)
         )
     }
 }
@@ -319,37 +312,6 @@ fun PersonalInformationItem(
     val currentUser = FirebaseAuth.getInstance().currentUser
     val db = FirebaseFirestore.getInstance()
 
-    val isNameListening = remember { mutableStateOf(false) }
-    val isEmailListening = remember { mutableStateOf(false) }
-    val isPhoneListening = remember { mutableStateOf(false) }
-    val isBloodTypeListening = remember { mutableStateOf(false) }
-    val isMedicalInfoListening = remember { mutableStateOf(false) }
-    val speechToTextHelper = remember {
-        SpeechToTextHelper(context) { result ->
-            when {
-                isNameListening.value -> {
-                    name.value = result
-                    isNameListening.value = false
-                }
-                isEmailListening.value -> {
-                    email.value = result
-                    isEmailListening.value = false
-                }
-                isPhoneListening.value -> {
-                    phone.value = result
-                    isPhoneListening.value = false
-                }
-                isBloodTypeListening.value -> {
-                    bloodType.value = result
-                    isBloodTypeListening.value = false
-                }
-                isMedicalInfoListening.value -> {
-                    medicalInfo.value = result
-                    isMedicalInfoListening.value = false
-                }
-            }
-        }
-    }
 
     LaunchedEffect(currentUser?.uid) {
         currentUser?.uid?.let { userId ->
@@ -405,56 +367,15 @@ fun PersonalInformationItem(
             InputField(
                 value = name.value,
                 label = "Full Name",
-                onValueChange = { name.value = it },
-                isRecording = isNameListening,
-                onMicClick = {
-                    // Stop other field listeners
-                    isEmailListening.value = false
-                    isPhoneListening.value = false
-                    isBloodTypeListening.value = false
-                    isMedicalInfoListening.value = false
+                onValueChange = { name.value = it }
 
-                    if (isNameListening.value) {
-                        speechToTextHelper.stopListening()
-                    } else {
-                        speechToTextHelper.startListening("Full Name")
-                    }
-                    isNameListening.value = !isNameListening.value
-                }
             )
 
-            InputField(value = email.value, label = "Email", onValueChange = { email.value = it }, isRecording = isEmailListening, onMicClick = {
-                isNameListening.value = false
-                isPhoneListening.value = false
-                isBloodTypeListening.value = false
-                isMedicalInfoListening.value = false
-                isEmailListening.value = !isEmailListening.value
-                if (isEmailListening.value) speechToTextHelper.startListening("Email") else speechToTextHelper.stopListening()
-            })
-            InputField(value = phone.value, label = "Phone Number", onValueChange = { phone.value = it }, isRecording = isPhoneListening, onMicClick = {
-                isNameListening.value = false
-                isEmailListening.value = false
-                isBloodTypeListening.value = false
-                isMedicalInfoListening.value = false
-                isPhoneListening.value = !isPhoneListening.value
-                if (isPhoneListening.value) speechToTextHelper.startListening("Phone Number") else speechToTextHelper.stopListening()
-            })
-            InputField(value = bloodType.value, label = "Blood Type", onValueChange = { bloodType.value = it }, isRecording = isBloodTypeListening, onMicClick = {
-                isNameListening.value = false
-                isPhoneListening.value = false
-                isEmailListening.value = false
-                isMedicalInfoListening.value = false
-                isBloodTypeListening.value = !isBloodTypeListening.value
-                if (isBloodTypeListening.value) speechToTextHelper.startListening("Blood Type") else speechToTextHelper.stopListening()
-            })
-            InputField(value = medicalInfo.value, label = "Medical Information", onValueChange = { medicalInfo.value = it }, isRecording = isMedicalInfoListening, onMicClick = {
-                isNameListening.value = false
-                isPhoneListening.value = false
-                isBloodTypeListening.value = false
-                isEmailListening.value = false
-                isMedicalInfoListening.value = !isMedicalInfoListening.value
-                if (isMedicalInfoListening.value) speechToTextHelper.startListening("Medical Information") else speechToTextHelper.stopListening()
-            })
+            InputField(value = email.value, label = "Email", onValueChange = { email.value = it })
+            InputField(value = phone.value, label = "Phone Number", onValueChange = { phone.value = it })
+
+            InputField(value = bloodType.value, label = "Blood Type", onValueChange = { bloodType.value = it })
+            InputField(value = medicalInfo.value, label = "Medical Information", onValueChange = { medicalInfo.value = it })
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -775,21 +696,6 @@ fun EmergencyContactsItem(emergencyContacts: MutableList<Pair<String, String>>, 
 fun EmergencyContactsItem(emergencyContacts: MutableList<Pair<String, String>>, ttsHelper: TextToSpeechHelper) {
     val context = LocalContext.current
     val isEditing = remember { mutableStateOf(false) }
-    val isNameListening = remember { mutableStateOf(false) }
-    val isPhoneListening = remember { mutableStateOf(false) }
-    val speechToTextHelper = remember {
-        SpeechToTextHelper(context) { result ->
-            emergencyContacts.forEachIndexed { index, contact ->
-                if (isNameListening.value) {
-                    emergencyContacts[index] = Pair(result, contact.second)
-                    isNameListening.value = false
-                } else if (isPhoneListening.value) {
-                    emergencyContacts[index] = Pair(contact.first, result)
-                    isPhoneListening.value = false
-                }
-            }
-        }
-    }
 
     val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -849,31 +755,13 @@ fun EmergencyContactsItem(emergencyContacts: MutableList<Pair<String, String>>, 
                 InputField(
                     value = nameState.value,
                     label = "Full Name",
-                    onValueChange = { nameState.value = it },
-                    isRecording = isNameListening,
-                    onMicClick = {
-                        if (isNameListening.value) {
-                            speechToTextHelper.stopListening()
-                        } else {
-                            speechToTextHelper.startListening("Full Name")
-                        }
-                        isNameListening.value = !isNameListening.value
-                    }
+                    onValueChange = { nameState.value = it }
                 )
 
                 InputField(
                     value = phoneState.value,
                     label = "Phone Number",
-                    onValueChange = { phoneState.value = it },
-                    isRecording = isPhoneListening,
-                    onMicClick = {
-                        if (isPhoneListening.value) {
-                            speechToTextHelper.stopListening()
-                        } else {
-                            speechToTextHelper.startListening("Phone Number")
-                        }
-                        isPhoneListening.value = !isPhoneListening.value
-                    }
+                    onValueChange = { phoneState.value = it }
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

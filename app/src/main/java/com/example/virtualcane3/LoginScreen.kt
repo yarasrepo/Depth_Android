@@ -72,23 +72,6 @@ fun LoginScreen(navController: NavController) {
         }
     }
 
-    RequestAudioPermission()
-    Surface {
-        Column(modifier = Modifier.fillMaxSize()) {
-            TopSection()
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 30.dp)
-            ) {
-                LoginSection(navController = navController, ttsHelper)
-                Spacer(modifier = Modifier.height(10.dp))
-                SocialMediaSection(navController = navController,ttsHelper)
-                CreateAccount(navController = navController, ttsHelper)
-            }
-        }
-    }
 }
 
 @Composable
@@ -271,24 +254,12 @@ private fun LoginSection(navController: NavController, ttsHelper: TextToSpeechHe
         }
     }
 
-    val speechHelper = remember {
-        SpeechToTextHelper(context) { result ->
-            if (isEmailListening) {
-                email = result
-                isEmailListening = false
-            } else if (isPasswordListening) {
-                password = result
-                isPasswordListening = false
-            }
-        }
-    }
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             LoginTextField(
                 label = "Email",
                 text = email,
-                isListening = isEmailListening,
                 trailing = "",
                 onTrailingClick = { },
                 modifier = Modifier
@@ -298,21 +269,6 @@ private fun LoginSection(navController: NavController, ttsHelper: TextToSpeechHe
 
             Spacer(modifier = Modifier.width(1.dp))
 
-            IconButton(onClick = {
-                if (isEmailListening) {
-                    speechHelper.stopListening()
-                } else {
-                    speechHelper.startListening("Email")
-                }
-                isEmailListening = !isEmailListening
-                isPasswordListening = false
-            }) {
-                Icon(
-                    painter = painterResource(id = if (isEmailListening) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-                    contentDescription = if (isEmailListening) "Stop Recording" else "Start Recording",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(15.dp))
@@ -322,7 +278,6 @@ private fun LoginSection(navController: NavController, ttsHelper: TextToSpeechHe
                 label = "Password",
                 text = password,
                 isPassword = !isPasswordVisible,
-                isListening = isPasswordListening,
                 trailing = "Forgot?",
                 onTrailingClick = { showForgotPasswordDialog = true },
                 modifier = Modifier
@@ -336,23 +291,6 @@ private fun LoginSection(navController: NavController, ttsHelper: TextToSpeechHe
                 )
             }
 
-            Spacer(modifier = Modifier.width(1.dp))
-
-            IconButton(onClick = {
-                if (isPasswordListening) {
-                    speechHelper.stopListening()
-                } else {
-                    speechHelper.startListening("Password")
-                }
-                isPasswordListening = !isPasswordListening
-                isEmailListening = false
-            }) {
-                Icon(
-                    painter = painterResource(id = if (isPasswordListening) R.drawable.ic_stop_recording else R.drawable.ic_microphone),
-                    contentDescription = if (isPasswordListening) "Stop Recording" else "Start Recording",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
