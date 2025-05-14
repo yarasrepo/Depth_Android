@@ -60,16 +60,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     private Runnable captureRunnable;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ToggleButton previewToggle;
+    private boolean isTtsReady = false;
+    private String lastSpokenLabel = null;
+    private long lastSpokenTime = 0;
+    private static final long SUPPRESSION_INTERVAL_MS = 15 * 1000;
 
     private TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         previewView = findViewById(R.id.previewView);
         previewToggle = findViewById(R.id.previewToggle);
-
 
         tts = new TextToSpeech(this, this);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -93,14 +99,26 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            tts.setLanguage(Locale.US);  // Set language
+            int result = tts.setLanguage(Locale.US);
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "Language not supported");
+            } else {
+                isTtsReady = true;
+                Log.i("TTS", "TTS language set successfully");
+            }
         } else {
             Log.e("TTS", "Initialization failed");
         }
     }
-    // Function to speak out the API response
+
     private void speak(String text) {
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        if (isTtsReady) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "tts1");
+            Log.d("TTS", "Speaking: " + text);
+        } else {
+            Log.w("TTS", "TTS not ready");
+        }
+
     }
 
     @Override
@@ -203,61 +221,43 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         // Initialize Retrofit service
         ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
 
-        // Send image to API
         Call<ResponseBody> call = apiService.uploadImage(filePart);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-//                    try {
-//                        String responseBody = response.body().string();
-//                        Log.d("API Response", "Received: " + responseBody);
-//                        //long depth = Long.parseLong(responseBody);
-//                        Toast.makeText(MainActivity.this, "Depth received: " + responseBody, Toast.LENGTH_LONG).show();
-//                        JSONObject jsonResponse = new JSONObject(responseBody);
-//
-//                        // Extract the depth value (estimated_distance_meters)
-//                        float depth = (float) jsonResponse.getDouble("estimated_distance_meters");
-//                        // Speak the distance
-//                        String message = "Estimated distance is " + depth + " meters";
-//                        speak(message);  // 🔹 TTS will now read this out loud
-//                        if(depth<=0.9){
-//                            triggerVibration();
-//                        }
-//
-//                    } catch (IOException | JSONException e) {
-//                        e.printStackTrace();
-//                    }
                     try {
                         String responseBody = response.body().string();
                         Log.d("API Response", "Received: " + responseBody);
                         JSONObject jsonResponse = new JSONObject(responseBody);
 
-                        // Extract distance
-                        float distance = (float) jsonResponse.getDouble("estimated_distance_meters");
+                        float distance = (float) jsonResponse.getDouble("distance");
+                         if (distance <= 500) {
+                             triggerVibration();
+                             String alertType = jsonResponse.getString("alert_type");
+                             if ("object".equals(alertType)) {
+                                 String label = jsonResponse.getString("label");
+                                 if (label != null) {
+                                     long currentTime = System.currentTimeMillis();
+                                     boolean isNewLabel = !label.equals(lastSpokenLabel);
+                                     boolean enoughTimePassed = (currentTime - lastSpokenTime) > SUPPRESSION_INTERVAL_MS;
 
-                        // Extract object label
-                        JSONArray detectedObjects = jsonResponse.getJSONArray("detected_objects");
-                        if (detectedObjects.length() > 0) {
-                            JSONObject firstObject = detectedObjects.getJSONObject(0);
-                            String label = firstObject.getString("label");
-
-                            // Announce both label and distance
-                            String message = "Detected " + label;
-                            speak(message);
-
-                            // Vibrate if close
-                            if (distance <= 0.9f) {
-                                triggerVibration();
-                            }
-                        } else {
-                            speak("No object detected");
+                                     if (isNewLabel || enoughTimePassed) {
+                                         String message = "Detected " + label;
+                                         speak(message);
+                                         lastSpokenLabel = label;
+                                         lastSpokenTime = currentTime;
+                                     } else {
+                                         Log.d("TTS", "Suppressed repeat detection of: " + label);
+                                     }
+                                 }
+                             }
+                        } else{
+                            Log.d("Not close", "No object detected");
                         }
-
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
-
 
                 } else {
                     Log.e("API Error", "Request failed: " + response.code());
@@ -353,14 +353,22 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         if (vibrator != null && vibrator.hasVibrator()) {
-
-            long[] pattern = {0, 500, 1000}; // Vibrate for 500ms, then wait for 1000ms
-            vibrator.vibrate(pattern, -1); // Pass -1 to not repeat the pattern
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                VibrationEffect effect = VibrationEffect.createWaveform(new long[]{0, 500, 1000}, -1);
+                vibrator.vibrate(effect);
+            } else {
+                // Deprecated on newer versions
+                vibrator.vibrate(new long[]{0, 500, 1000}, -1);
+            }
         }
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(captureRunnable);
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
     }
 }
