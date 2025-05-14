@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         previewToggle = findViewById(R.id.previewToggle);
 
 
-        // Initialize TTS
         tts = new TextToSpeech(this, this);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
@@ -81,13 +80,13 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
 
         previewToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                // Show the camera preview
                 previewView.setVisibility(View.VISIBLE);
                 findViewById(R.id.blackScreenView).setVisibility(View.GONE);
+                findViewById(R.id.centerImage).setVisibility(View.GONE);
             } else {
-                // Hide the camera preview, but keep capturing images
                 previewView.setVisibility(View.GONE);
                 findViewById(R.id.blackScreenView).setVisibility(View.VISIBLE);
+                findViewById(R.id.centerImage).setVisibility(View.VISIBLE);
             }
         });
     }
