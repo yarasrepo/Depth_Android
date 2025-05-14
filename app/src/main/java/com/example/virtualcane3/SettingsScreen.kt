@@ -207,7 +207,7 @@ fun RangeSettingsItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = detectionRange.value,
         onOptionSelected = {
             detectionRange.value = it
-            ttsHelper.speak("Detection range set to $it")
+            ttsHelper.speak("Detection range set to $it, but this feature is coming soon")
             updateUserSetting(userId, "detectionRange", it)
         }
     )
@@ -222,7 +222,7 @@ fun RangeSettingsItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = sensitivityLevel.value,
         onOptionSelected = {
             sensitivityLevel.value = it
-            ttsHelper.speak("Sensitivity level set to $it")
+            ttsHelper.speak("Sensitivity level set to $it, but this feature is coming soon")
             updateUserSetting(userId, "sensitivityLevel", it)
         }
     )
@@ -248,7 +248,7 @@ fun FeedbackPreferencesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = feedbackMode.value,
         onOptionSelected = {
             feedbackMode.value = it
-            ttsHelper.speak("Feedback mode set to $it")
+            ttsHelper.speak("Feedback mode set to $it, but this feature is coming soon")
             updateUserSetting(userId, "feedbackMode", it)
         }
     )
@@ -258,7 +258,7 @@ fun FeedbackPreferencesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         value = vibrationIntensity.value,
         onValueChange = {
             vibrationIntensity.value = it
-            ttsHelper.speak("Vibration intensity set to $it")
+            ttsHelper.speak("Vibration intensity set to $it, but this feature is coming soon")
             updateUserSetting(userId, "vibrationIntensity", it)
         }
     )
@@ -268,7 +268,7 @@ fun FeedbackPreferencesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         value = audioVolume.value,
         onValueChange = {
             audioVolume.value = it
-            ttsHelper.speak("Audio volume set to $it")
+            ttsHelper.speak("Audio volume set to $it, but this feature is coming soon")
             updateUserSetting(userId, "audioVolume", it)
         }
     )
@@ -297,7 +297,7 @@ fun ObstacleCustomizationItem(ttsHelper: TextToSpeechHelper, userId: String) {
                 ttsHelper.speak("$selected deselected")
             } else {
                 obstacleCategories.value = obstacleCategories.value + selected
-                ttsHelper.speak("$selected selected")
+                ttsHelper.speak("$selected selected, but this feature is coming soon")
             }
             updateUserSetting(userId, "obstacleCategories", obstacleCategories.value.toList())
         }
@@ -308,7 +308,7 @@ fun ObstacleCustomizationItem(ttsHelper: TextToSpeechHelper, userId: String) {
         value = alertDistance.value,
         onValueChange = {
             alertDistance.value = it
-            ttsHelper.speak("Object distance alert set to $it")
+            ttsHelper.speak("Object distance alert set to $it, but this feature is coming soon")
             updateUserSetting(userId, "alertDistance", it)
         }
     )
@@ -332,7 +332,7 @@ fun EnvironmentalModesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = environmentMode.value,
         onOptionSelected = {
             environmentMode.value = it
-            ttsHelper.speak("Environment mode set to $it")
+            ttsHelper.speak("Environment mode set to $it, but this feature is coming soon")
             updateUserSetting(userId, "environmentMode", it)
         }
     )
@@ -343,7 +343,7 @@ fun EnvironmentalModesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = lightingCondition.value,
         onOptionSelected = {
             lightingCondition.value = it
-            ttsHelper.speak("Lighting condition set to $it")
+            ttsHelper.speak("Lighting condition set to $it, but this feature is coming soon")
             updateUserSetting(userId, "lightingCondition", it)
         }
     )
@@ -371,7 +371,7 @@ fun AccessibilityFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         value = textToSpeechSpeed.value,
         onValueChange = {
             textToSpeechSpeed.value = it
-            ttsHelper.speak("Text-to-speech speed set to $it")
+            ttsHelper.speak("Text-to-speech speed set to $it, but this feature is coming soon")
             updateUserSetting(userId, "textToSpeechSpeed", it)
         }
     )
@@ -397,7 +397,7 @@ fun AccessibilityFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         checked = screenReaderMode.value,
         onCheckedChange = {
             screenReaderMode.value = it
-            ttsHelper.speak("Screen reader mode set to $it")
+            ttsHelper.speak("Screen reader mode set to $it, but this feature is coming soon")
             updateUserSetting(userId, "screenReaderMode", it)
         }
     )
@@ -407,7 +407,7 @@ fun AccessibilityFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         selectedOption = appearance.value,
         onOptionSelected = {
             appearance.value = it
-            ttsHelper.speak("Appearance set to $it")
+            ttsHelper.speak("Appearance set to $it, but this feature is coming soon")
             updateUserSetting(userId, "appearance", it)
         }
     )
@@ -415,7 +415,6 @@ fun AccessibilityFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
 
 @Composable
 fun DeviceManagementItem(ttsHelper: TextToSpeechHelper, userId: String) {
-    val calibrateSensorsClicked = remember { mutableStateOf(false) }
     val batteryMode = remember { mutableStateOf("Performance") }
 
     LaunchedEffect(Unit) {
@@ -424,25 +423,13 @@ fun DeviceManagementItem(ttsHelper: TextToSpeechHelper, userId: String) {
         }
     }
 
-    Button(
-        onClick = { calibrateSensorsClicked.value = true },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = BlueGray,
-            contentColor = Color.White
-        ),
-        shape = RoundedCornerShape(size = 4.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Calibrate Sensors")
-    }
-
     OptionsRow(
         label = "Battery Usage Mode",
         options = listOf("Performance", "Battery Saver"),
         selectedOption = batteryMode.value,
         onOptionSelected = {
             batteryMode.value = it
-            ttsHelper.speak("Battery usage mode set to $it")
+            ttsHelper.speak("Battery usage mode set to $it, but this feature is coming soon")
             updateUserSetting(userId, "batteryMode", it)
         }
     )
@@ -470,7 +457,7 @@ fun SafetyFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         checked = emergencyAlertEnabled.value,
         onCheckedChange = {
             emergencyAlertEnabled.value = it
-            ttsHelper.speak("Emergency alert button is set to $it")
+            ttsHelper.speak("Emergency alert button is set to $it, but this feature is coming soon")
             updateUserSetting(userId, "emergencyAlertEnabled", it)
         }
     )
@@ -480,7 +467,7 @@ fun SafetyFeaturesItem(ttsHelper: TextToSpeechHelper, userId: String) {
         value = fallDetectionSensitivity.value,
         onValueChange = {
             fallDetectionSensitivity.value = it
-            ttsHelper.speak("Fall detection sensitivity set to $it")
+            ttsHelper.speak("Fall detection sensitivity set to $it, but this feature is coming soon")
             updateUserSetting(userId, "fallDetectionSensitivity", it)
         }
     )
@@ -501,7 +488,7 @@ fun DataPrivacySettingsItem(ttsHelper: TextToSpeechHelper, userId: String) {
         checked = dataSharingEnabled.value,
         onCheckedChange = {
             dataSharingEnabled.value = it
-            ttsHelper.speak("Data sharing is set to $it")
+            ttsHelper.speak("Data sharing is set to $it, but this feature is coming soon")
             updateUserSetting(userId, "dataSharingEnabled", it)
         }
     )
@@ -523,7 +510,7 @@ fun GeneralSettingsItem(ttsHelper: TextToSpeechHelper, userId: String) {
         checked = notificationsEnabled.value,
         onCheckedChange = {
             notificationsEnabled.value = it
-            ttsHelper.speak("Notifications are set to $it")
+            ttsHelper.speak("Notifications are set to $it, but this feature is coming soon")
             updateUserSetting(userId, "notificationsEnabled", it)
         }
     )
