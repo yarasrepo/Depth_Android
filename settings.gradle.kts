@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "VirtualCane3"
+rootProject.name = "Depth_Android"
 include(":app")

@@ -6,17 +6,23 @@ plugins {
 }
 
 android {
+    namespace = "com.example.depth_android"
     namespace = "com.example.virtualcane3"
     compileSdk = 35
 
     defaultConfig {
+        applicationId = "com.example.depth_android"
         applicationId = "com.example.virtualcane3"
         minSdk = 24
         targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -29,14 +35,22 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -60,6 +74,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation (libs.volley)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
     implementation("androidx.navigation:navigation-compose:2.8.7")
     implementation("com.exyte:animated-navigation-bar:1.0.0")
     implementation(libs.androidx.material3.android)

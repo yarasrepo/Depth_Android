@@ -1,4 +1,5 @@
 <resources>
     <string name="login">Login</string>
     <string name="default_web_client_id">1055810083673-nvh34amjpq5q2a4r0ihpfu0ck15nuo09.apps.googleusercontent.com</string>
+    <string name="app_name">Depth_Android</string>
 </resources>
